@@ -2,7 +2,7 @@
   "name": "linky-web",
   "private": true,
   "scripts": {
-    "dev": "npx serve linky-customer -l 3456 --no-clipboard",
+    "dev": "npx serve peymis-web -l 3456 --no-clipboard",
     "open": "start http://localhost:3456"
   }
 }

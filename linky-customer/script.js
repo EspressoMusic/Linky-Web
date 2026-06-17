@@ -14,7 +14,11 @@ const themeToggle = document.getElementById("themeToggle");
 const themeMeta = document.querySelector('meta[name="theme-color"]');
 
 function getTheme() {
-  return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+  if (document.documentElement.getAttribute("data-theme") === "light") return "light";
+  try {
+    if (localStorage.getItem(THEME_KEY) === "dark") return "dark";
+  } catch (e) {}
+  return "light";
 }
 
 function applyTheme(theme) {
@@ -25,7 +29,7 @@ function applyTheme(theme) {
     document.documentElement.removeAttribute("data-theme");
   }
   themeToggle?.setAttribute("aria-checked", String(isLight));
-  if (themeMeta) themeMeta.content = isLight ? "#f5efe8" : "#2a2119";
+  if (themeMeta) themeMeta.content = isLight ? "#e8dfd4" : "#261e18";
   try {
     localStorage.setItem(THEME_KEY, theme);
   } catch (e) {}
@@ -175,30 +179,9 @@ scheduleScroll();
 
 /* ── Enhancements (deferred so first paint is fast) ── */
 
-const LETTER_TITLE_SEL =
-  ".section-title, .hero-title .line, .cta-title, .pitch-card h3, .split-panel h3, .step-card h3";
+const LETTER_TITLE_SEL = ".pitch-card h3, .split-panel h3, .step-card h3";
 const GLIDE_TEXT_SEL =
   ".section-lead, .section-body, .pitch-card p, .step-card p, .split-panel p, .invest-box p";
-const BRAND_IMG_SRC = "assets/linky-wordmark.svg";
-
-function brandImgHtml() {
-  return `<img src="${BRAND_IMG_SRC}" alt="Linky" class="brand-inline" dir="ltr" lang="en" loading="lazy" decoding="async" />`;
-}
-
-function wrapLatinBrands() {
-  const skip = ".title-letters, .brand-inline, .logo-wordmark";
-  document
-    .querySelectorAll(
-      ".section-body, .section-lead, .section-num, .pitch-card p, .pitch-card h3, .step-card p"
-    )
-    .forEach((el) => {
-      if (el.dataset.brandWrapped || el.closest(skip)) return;
-      if (!/Linky/i.test(el.textContent)) return;
-      el.innerHTML = el.innerHTML.replace(/Linky/gi, brandImgHtml());
-      el.dataset.brandWrapped = "1";
-    });
-}
-
 function appendCharSpan(parent, ch) {
   const span = document.createElement("span");
   span.className = "char" + (/\s/.test(ch) ? " space" : "");
@@ -206,26 +189,11 @@ function appendCharSpan(parent, ch) {
   parent.appendChild(span);
 }
 
-function appendBrandImg(parent) {
-  const img = document.createElement("img");
-  img.src = BRAND_IMG_SRC;
-  img.alt = "Linky";
-  img.className = "brand-inline brand-inline--title";
-  img.setAttribute("dir", "ltr");
-  img.loading = "lazy";
-  img.decoding = "async";
-  parent.appendChild(img);
-}
-
 function isHebrewChar(ch) {
   return /[\u0590-\u05FF]/.test(ch);
 }
 
 function appendWordSpans(parent, word) {
-  if (/^linky$/i.test(word)) {
-    appendBrandImg(parent);
-    return;
-  }
   const wrapper = document.createElement("span");
   wrapper.className = isHebrewChar(word[0]) ? "hebrew-word" : "latin-brand";
   if (!isHebrewChar(word[0])) wrapper.setAttribute("dir", "ltr");
@@ -321,7 +289,6 @@ function initMegaCards(selector) {
 }
 
 function runEnhancements() {
-  wrapLatinBrands();
   document.querySelectorAll(GLIDE_TEXT_SEL).forEach(initGlideText);
   initMegaCards(".pitch-card");
   initMegaCards(".step-card");
@@ -359,7 +326,7 @@ function loadLogoConfettiShape(confettiFn) {
       resolve(logoConfettiShape);
     };
     img.onerror = () => resolve(null);
-    img.src = "assets/linky-icon.png";
+    img.src = "assets/linky-icon.png?v=2";
   });
 }
 
